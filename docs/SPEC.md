@@ -433,7 +433,7 @@ The generated values may be of any other type but must all be the same type.
 
 [IMPL#658](https://github.com/influxdata/platform/query/issues/658) Implement Generators types
 
-##### Polymorphism
+#### Polymorphism
 
 Flux types can be polymorphic, meaning that a type may take on many different types.
 Flux supports let-polymorphism and structural polymorphism.
@@ -830,6 +830,86 @@ Examples:
     f()
     a
 
+#### Named types
+
+A named type can be created using a type assignment statement.
+
+    TypeAssignement   = "type" identifier "=" TypeExpression
+    TypeExpression    = identifier
+                      | TypeParameter
+                      | ObjectType
+                      | ArrayType
+                      | GeneratorType
+                      | FunctionType .
+    TypeParameter     = "'" identifier .
+    ObjectType        = "{" PropertyTypeList [";" ObjectUpperBound ] "}" .
+    ObjectUpperBound  = "any" | PropertyTypeList .
+    PropertyTypeList  = PropertyType [ "," PropertyType ] .
+    PropertyType      = identifier ":" TypeExpression
+                      | string_lit ":" TypeExpression .
+    ArrayType         = "[]" TypeExpression .
+    GeneratorType     = "[...]" TypeExpression .
+    FunctionType      = FunctionParameterTypeList "->" TypeExpression
+    ParameterTypeList = "(" ParameterType { "," ParameterType } ")" .
+    ParameterType     = identifier ":" [ pipe_receive_lit ] TypeExpression .
+
+Named types are in their own namespace.
+It is possible for a value and a type to have the same identifier.
+The following named types are built-in.
+
+    bool     // boolean
+    int      // integer
+    uint     // unsigned integer
+    float    // floating point number
+    duration // duration of time
+    time     // time
+    string   // utf-8 encoded string
+    regexp   // regular expression
+    type     // a type that itself describes a type
+
+
+When an object's upper bound is not specified, it is assumed to be equal to its lower bound.
+
+Parameters to function types define whether the parameter is a pipe forward parameter and whether the parameter has a default value.
+The `<-` indicates the parameter is the pipe forward parameter.
+
+Examples:
+ 
+    // alias the bool type
+    type boolean = bool
+
+    // define a person as an object type
+    type person = {
+        name: string,
+        age: int,
+    }
+
+    // Define addition on ints
+    type intAdd = (a: int, b: int) -> int
+
+    // Define polymorphic addition 
+    type add = (a: 'a, b: 'a) -> 'a
+
+    // Define funcion with pipe parameter
+    type bar = (foo: <-string) -> string
+
+    // Define object type with an empty lower bound and an explicit upper bound
+    type address = {
+        ;
+        street: string,
+        city: string,
+        state: string,
+        country: string,
+        province: string,
+        zip: int,
+    }
+
+### Types as values
+
+A special type named `type` describes values which can hold any other type.
+
+TODO: Is this needed? I think it is for columns to describe their type, but maybe they can just use an enum.
+
 ### Side Effects
 
 Side effects can occur in two ways.
@@ -890,19 +970,19 @@ December  = 12
 
 These are builtin functions that all take a single `time` argument and return an integer.
 
-* `second` - integer
+* `second` int
     Second returns the second of the minute for the provided time in the range `[0-59]`.
-* `minute` - integer
+* `minute` int
     Minute returns the minute of the hour for the provided time in the range `[0-59]`.
-* `hour` - integer
+* `hour` int
     Hour returns the hour of the day for the provided time in the range `[0-59]`.
-* `weekDay` - integer
+* `weekDay` int
     WeekDay returns the day of the week for the provided time in the range `[0-6]`.
-* `monthDay` - integer
+* `monthDay` int
     MonthDay returns the day of the month for the provided time in the range `[1-31]`.
-* `yearDay` - integer
+* `yearDay` int
     YearDay returns the day of the year for the provided time in the range `[1-366]`.
-* `month` - integer
+* `month` int
     Month returns the month of the year for the provided time in the range `[1-12]`.
 
 [IMPL#155](https://github.com/influxdata/flux/issues/155) Implement Time and date functions 
@@ -921,7 +1001,13 @@ The generator is then used to produce the set of intervals.
 The set of intervals will include all intervals that intersect with the initial range of time.
 The `intervals` function is designed to be used with the `intervals` parameter of the `window` function.
 
+An interval is a built-in named type:
 
+    type interval = {
+        start: time,
+        stop: time,
+    }
+    
 Intervals has the following parameters:
 
 * `every` duration
@@ -937,10 +1023,14 @@ Intervals has the following parameters:
     Offset is the offset duration relative to the location offset.
     It can be negative, indicating that the offset goes backwards in time.
     Defaults to zero.
-* `filter` function
+* `filter` (interval: interval) -> bool
     Filter accepts an interval object and returns a boolean value.
     Each potential interval is passed to the filter function, when the function returns false, that interval is excluded from the set of intervals.
     Defaults to include all intervals.
+
+The intervals function has the following signature:
+
+    (start: time, stop: time) -> (start: time, stop: time) -> [...]interval
 
 Examples:
 
@@ -1047,7 +1137,7 @@ FixedZone creates a location based on a fixed time offset from UTC.
 
 FixedZone has the following parameters:
 
-* offset duration
+* `offset` duration
     Offset is the offset from UTC for the time zone.
     Offset must be less than 24h.
     Defaults to 0, which produces the UTC location.
@@ -1066,7 +1156,7 @@ LoadLoacation loads a locations from a time zone database.
 
 LoadLocation has the following parameters:
 
-* name string
+* `name` string
     Name is the name of the location to load.
     The names correspond to names in the [IANA tzdb](https://www.iana.org/time-zones).
 
@@ -1186,12 +1276,18 @@ Example:
 Buckets is a type of data source that retrieves a list of buckets that the caller is authorized to access.  
 It takes no input parameters and produces an output table with the following columns: 
 
-* name (string): the name of the bucket
-* id (string): the internal ID of the bucket
-* organization (string): the organization this bucket belongs to
-* organizationID (string): the internal ID of the organization
-* retentionPolicy (string): the name of the retention policy, if present
-* retentionPeriod (duration): the duration of time for which data is held in this bucket
+* `name` string
+    the name of the bucket
+* `id` string
+    the internal ID of the bucket
+* `organization` string
+    the organization this bucket belongs to
+* `organizationID` string
+    the internal ID of the organization
+* `retentionPolicy` string
+    the name of the retention policy, if present
+* `retentionPeriod` duration
+    the duration of time for which data is held in this bucket
 
 Example: 
 
@@ -1255,7 +1351,7 @@ Any output table will have the following properties:
 
 All aggregate operations have the following properties:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate.
 
 ##### AggregateWindow
@@ -1269,9 +1365,9 @@ AggregateWindow has the following properties:
 
 * `every` duration
     Every specifies the window size to aggregate.
-* `fn` aggregate function
+* `fn` (tables: <-stream, columns: []string) -> stream
     Fn specifies the aggregate operation to perform. Any of the functions in this Aggregate section can be provided.
-* `columns` list of string
+* `columns` []string
     Columns specifies a list of columns to aggregate.
     Defaults to ["_value"]
 * `timeSrc` string
@@ -1298,7 +1394,7 @@ Covariance computes the covariance between two columns.
 
 Covariance has the following properties:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 * `pearsonr` bool
     pearsonr indicates whether the result should be normalized to be the Pearson R coefficient.
@@ -1321,7 +1417,7 @@ Cov has the following properties:
     X is one of the input streams
 * `y` stream
     Y is one of the input streams
-* `on` list of strings
+* `on` []string
     On is the list of columns on which to join.
 * `pearsonr` bool
     pearsonr indicates whether the result should be normalized to be the Pearson R coefficient.
@@ -1349,7 +1445,7 @@ For each aggregated column, it outputs the number of non null records as an inte
 
 Count has the following property:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 
 Example:
@@ -1366,7 +1462,7 @@ The curve is defined as function where the domain is the record times and the ra
 
 Integral has the following properties:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 * `unit` duration
     unit is the time duration to use when computing the integral
@@ -1390,7 +1486,7 @@ For each aggregated column, it outputs the mean of the non null records as a flo
 
 Mean has the following property:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 
 Example:
@@ -1430,7 +1526,7 @@ In the aggregate methods, it outputs the value that represents the specified per
 
 Percentile has the following properties:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 * `percentile` float
     A value between 0 and 1 indicating the desired percentile.
@@ -1460,7 +1556,7 @@ For each aggregated column, it outputs the skew of the non null record as a floa
 
 Skew has the following parameter:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 
 Example:
@@ -1480,7 +1576,7 @@ All other input types are invalid.
 
 Spread has the following parameter:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 
 Example:
@@ -1497,7 +1593,7 @@ For each aggregated column, it outputs the standard deviation of the non null re
 
 Stddev has the following parameter:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 
 Example:
@@ -1516,7 +1612,7 @@ The output column type is the same as the input column type.
 
 Sum has the following parameter:
 
-* `columns` list of string
+* `columns` []string
     columns specifies a list of columns to aggregate. Defaults to `["_value"]`
 
 Example:
@@ -1649,9 +1745,9 @@ Sample selects a subset of the records from the input table.
 
 The following properties define how the sample is selected.
 
-* `n`
+* `n` int
     Sample every Nth element
-* `pos`
+* `pos` int
     Position offset from start of results to begin sampling.
     The `pos` must be less than `n`.
     If `pos` is less than 0, a random offset is used.
@@ -1676,7 +1772,7 @@ The output tables will have the same schema as their corresponding input tables.
 
 Filter has the following properties:
 
-* `fn` function(record) bool
+* `fn` (r: record) -> bool
     Predicate function.
     The function must accept a single record parameter and return a boolean value.
     Each record will be passed to the function.
@@ -1708,10 +1804,10 @@ All of the highest/lowest functions take the following parameters:
 
 * `n` int
     N is the number of records to select.
-* `columns` list of strings
+* `columns` []string
     Columns is the list of columns to use when aggregating.
     Defaults to `["_value"]`.
-* `groupColumns` list of strings
+* `groupColumns` []string
     GroupColumns are the columns on which to group to perform the aggregation.
 
 #### Histogram
@@ -1736,7 +1832,7 @@ Histogram has the following properties:
 * `countColumn` string
     CountColumn is the name of the column in which to store the histogram counts.
     Defaults to `_value`.
-* `bins` array of floats
+* `bins` []float
     Bins is a list of upper bounds to use when computing the histogram frequencies.
     Each element in the array should contain a float value that represents the maximum value for a bin.
 * `normalize` bool
@@ -1849,7 +1945,7 @@ When the output record drops a column that was part of the group key that column
 
 Map has the following properties:
 
-* `fn` function
+* `fn` (r: record) -> record
     Function to apply to each record.
     The return value must be an object.
 * `mergeKey` bool
@@ -1891,9 +1987,9 @@ Tables where all records exists outside the time bounds are filtered entirely.
 
 Range has the following properties:
 
-* `start` duration or timestamp
+* `start` time
     Specifies the oldest time to be included in the results
-* `stop` duration or timestamp
+* `stop` time
     Specifies the exclusive newest time to be included in the results.
     Defaults to the value of the `now` option time.
 * `timeColumn` string
@@ -1932,7 +2028,7 @@ If a specified column is not present in a table an error will be thrown.
 Rename has the following properties: 
 * `columns` object
 	A map of columns to rename and their corresponding new names. Cannot be used with `fn`. 
-* `fn` function 
+* `fn` (column: string) -> string
     A function which takes a single string parameter `column` (the old column name) and returns a string representing 
     the new column name. Cannot be used with `columns`.
 
@@ -1958,9 +2054,9 @@ list, or a predicate function.
 When a dropped column is part of the group key it will also be dropped from the key.
 
 Drop has the following properties:
-* `columns` array of strings 
+* `columns` []string
     An array of columns which should be excluded from the resulting table. Cannot be used with `fn`.
-* `fn` function 
+* `fn` (column: string) -> bool
     A function which takes a column name as a parameter `column` and returns a boolean indicating whether
     or not the column should be excluded from the resulting table. Cannot be used with `columns`.  
 
@@ -1987,9 +2083,9 @@ Only columns in the group key that are also specified in `keep` will be kept in 
 If a specified column is not present in a table an error will be thrown.
 
 Keep has the following properties: 
-* `columns` array of strings
+* `columns` []string
     An array of columns that should be included in the resulting table. Cannot be used with `fn`.
-* `fn` function
+* `fn` (column: string) -> bool
     A function which takes a column name as a parameter `column` and returns a boolean indicating whether or not
     the column should be included in the resulting table. Cannot be used with `columns`. 
 
@@ -2061,7 +2157,7 @@ The output tables will have the same schema as their corresponding input tables.
 
 Sort has the following properties:
 
-* `columns` list of strings
+* `columns` []string
     List of columns used to sort; precedence from left to right.
     Default is `["_value"]`
 * `desc` bool
@@ -2082,7 +2178,7 @@ It produces tables with new group keys based on the provided properties.
 
 Group has the following properties:
 
-*  `columns` list of strings
+*  `columns` []string
     List of columns used to calculate the new group key.
     The default is `[]`.
 *  `mode` string
@@ -2144,7 +2240,7 @@ The group key of the resulting table is empty.
 Keys outputs a table with the input table's group key columns, plus a `_value` column containing the names of the input table's columns.  
 
 Keys has the following property: 
-*  `except` list of strings
+*  `except` []string
    Do not include the given names in the output.  Defaults to `["_time", "_value"]`
    
 ```
@@ -2159,9 +2255,10 @@ KeyValues outputs a table with the input table's group key, plus two columns  `_
 (column, value) pairs from the input table.  
 
 KeyValues has the following properties: 
-*  `keyColumns` list of strings
+*  `keyColumns` []string
    A list of columns from which values are extracted
-*  `fn` schema function that may by used instead of `keyColumns` to identify the set of columns.  
+*  `fn` (schema: schema) -> []string
+   A schema function that may by used instead of `keyColumns` to identify the set of columns.  
 
 Additional requirements: 
 *  Only one of `keyColumns` or `fn` may be used in a single call.  
@@ -2238,7 +2335,7 @@ Window has the following properties:
     The offset duration relative to the location offset.
     It can be negative, indicating that the offset goes backwards in time.
     The default aligns the window boundaries to line up with the `now` option time.
-* `intervals` function that returns an interval generator
+* `intervals` (start: time, stop: time) -> [...]interval
     A set of intervals to be used as the windows.
     One of `every`, `period` or `intervals` must be provided.
     When `intervals` is provided, `every`, `period`, and `offset` must be zero.
@@ -2272,9 +2369,9 @@ Pivot collects values stored vertically (column-wise) in a table and aligns them
 
 Pivot has the following properties:
 
-* `rowKey` array of strings
+* `rowKey` []string
     List of columns used to uniquely identify a row for the output.
-* `columnKey` array of strings
+* `columnKey` []string
     List of columns used to pivot values onto each row identified by the rowKey. 
 * `valueColumn` string
     Identifies the single column that contains the value to be moved around the pivot
@@ -2330,7 +2427,7 @@ The resulting schema is the union of the input schemas, and the resulting group 
 
 * `tables` object  
     The map of streams to be joined.  
-* `on` list of strings  
+* `on` []string  
     The list of columns on which to join.  
 * `method` string  
     The method of join.  
@@ -2434,7 +2531,7 @@ the Union operation shall be the union of all input schemas.
 Union does not preserve the sort order of the rows within tables. A sort operation may be added if a specific sort order is needed.
 
 Union has the following properties:
-* `tables` a list of streams
+* `tables` []stream
     tables specifies the streams to union together.  There must be at least two streams.
 
 For example, given this stream, `SF_Weather` with group key `"_field"` on both tables:
@@ -2498,9 +2595,8 @@ The output table schema will be the same as the input table.
 
 Cumulative sum has the following properties:
 
-* `columns` list of strings  
-    Columns on which to operate.  
-    Defaults to `_value`.  
+* `columns` []string
+    columns is a list of columns on which to operate.
 
 Example:
 ```
@@ -2522,8 +2618,8 @@ Derivative has the following properties:
 * `nonNegative` bool
     nonNegative indicates if the derivative is allowed to be negative.
     If a value is encountered which is less than the previous value then it is assumed the previous value should have been a zero.
-* `columns` list strings
-    columns is a list of columns on which to compute the derivative.
+* `columns` []string
+    columns is a list of columns on which to compute the derivative
     Defaults to `["_value"]`.
 * `timeColumn` string
     timeColumn is the column name for the time values.
@@ -2545,7 +2641,7 @@ Difference has the following properties:
 * `nonNegative` bool
     nonNegative indicates if the derivative is allowed to be negative.
     If a value is encountered which is less than the previous value then it is assumed the previous value should have been a zero.
-* `columns` list strings
+* `columns` []string
     columns is a list of columns on which to compute the difference.
     Defaults to `["_value"]`.
 
@@ -2583,7 +2679,7 @@ Shift has the following properties:
 * `shift` duration  
     The amount to add to each time value.  
     May be a negative duration.  
-* `columns` list of strings  
+* `columns` []string
     List of all columns that should be shifted.  
     Defaults to `["_start", "_stop", "_time"]`  
 
@@ -2612,7 +2708,7 @@ StateDuration computes the duration of a given state.
 
 StateDuration has the following parameters:
 
-* `fn` function bool
+* `fn` (r: record) -> bool
     Fn is a function that returns true when the record is in the desired state.
 * `column` string
     Column is the name of the column to use to output the state value.
@@ -2641,10 +2737,10 @@ To has the following properties:
 * `timeColumn` string  
     The time column of the output.  
     **Default:** `"_time"`
-* `tagColumns` list of strings  
+* `tagColumns` []string
     The tag columns of the output.  
     **Default:** All columns of type string, excluding all value columns and the `_field` column if present.
-* `fieldFn` function(record) object  
+* `fieldFn` (r: record) -> record TODO This function signature needs to be changed
     Function that takes a record from the input table and returns an object.  
     For each record from the input table `fieldFn` returns on object that maps output field key to output value.  
     **Default:** `(r) => ({ [r._field]: r._value })`
@@ -2697,7 +2793,7 @@ Top and Bottom have the following parameters:
 
 * `n` int
     N is the number of records to keep.
-* `columns` list of strings
+* `columns` []string
     Columns provides the sort order for the tables.
 
 Example:
