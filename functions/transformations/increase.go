@@ -14,6 +14,5 @@ var increaseBuiltIn = `
 increase = (tables=<-, columns=["_value"]) => 
     tables
         |> difference(nonNegative: true, columns:columns)
-        |> cumulativeSum()
-	
+        |> cumulativeSum(columns:columns)
 `

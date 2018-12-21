@@ -2500,7 +2500,7 @@ Cumulative sum has the following properties:
 
 * `columns` list of strings  
     Columns on which to operate.  
-    Defaults to `_value`.  
+    Defaults to `["_value"]`.  
 
 Example:
 ```
@@ -2568,6 +2568,35 @@ from(bucket: "telegraf/autogen")
 	|> filter(fn: (r) => r._measurement == "cpu")
 	|> distinct(column: "host")
 ```
+
+#### Increase
+
+Increase computes the total non-negative difference between values in a table. 
+If the values resets it is assumed the previous count was zero.
+The output table schema will be the same as the input table.
+
+* `columns` list of strings  
+    Columns on which to operate.  
+    Defaults to `["_value"]`.  
+
+Examples:
+
+Given the following input table.
+
+    | _time | _value |
+    | ----- | ------ |
+    | 00001 | 1      |
+    | 00002 | 5      |
+    | 00003 | 3      |
+    | 00004 | 4      |
+
+`increase()` produces the following table.
+
+    | _time | _value |
+    | ----- | ------ |
+    | 00002 | 4      |
+    | 00003 | 7      |
+    | 00004 | 8      |
 
 #### Shift
 
