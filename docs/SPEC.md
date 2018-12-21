@@ -922,7 +922,19 @@ A function produces side effects when it is explicitly declared to have side eff
 
 ## Built-ins
 
-Flux contains many preassigned values in the universe block.
+Flux contains many preassigned values.
+These preassigned values are defined in the source files for the various built-in packages.
+
+### System built-ins
+
+When a built-in value is not expressable in Flux its value may be defined by the hosting environment.
+All such values must have a corresponding "builtin" statement to declare the existance and type of the built-in value.
+
+    BuiltinStatement = "builtin" identifer "=" TypeExpression
+
+Example
+
+    builtin from = (bucket: string, bucketID: string) -> stream
 
 ### Time constants
 
