@@ -225,33 +225,33 @@ func TestDifference_Process(t *testing.T) {
 		},
 		// TODO(affo): won't pass until https://github.com/apache/arrow/issues/3270 get's fixed
 		/*
-		{
-			name: "float with tags",
-			spec: &transformations.DifferenceProcedureSpec{
-				Columns: []string{execute.DefaultValueColLabel},
+			{
+				name: "float with tags",
+				spec: &transformations.DifferenceProcedureSpec{
+					Columns: []string{execute.DefaultValueColLabel},
+				},
+				data: []flux.Table{&executetest.Table{
+					ColMeta: []flux.ColMeta{
+						{Label: "_time", Type: flux.TTime},
+						{Label: "_value", Type: flux.TFloat},
+						{Label: "t", Type: flux.TString},
+					},
+					Data: [][]interface{}{
+						{execute.Time(1), 2.0, "a"},
+						{execute.Time(2), 1.0, "b"},
+					},
+				}},
+				want: []*executetest.Table{{
+					ColMeta: []flux.ColMeta{
+						{Label: "_time", Type: flux.TTime},
+						{Label: "_value", Type: flux.TFloat},
+						{Label: "t", Type: flux.TString},
+					},
+					Data: [][]interface{}{
+						{execute.Time(2), -1.0, "b"},
+					},
+				}},
 			},
-			data: []flux.Table{&executetest.Table{
-				ColMeta: []flux.ColMeta{
-					{Label: "_time", Type: flux.TTime},
-					{Label: "_value", Type: flux.TFloat},
-					{Label: "t", Type: flux.TString},
-				},
-				Data: [][]interface{}{
-					{execute.Time(1), 2.0, "a"},
-					{execute.Time(2), 1.0, "b"},
-				},
-			}},
-			want: []*executetest.Table{{
-				ColMeta: []flux.ColMeta{
-					{Label: "_time", Type: flux.TTime},
-					{Label: "_value", Type: flux.TFloat},
-					{Label: "t", Type: flux.TString},
-				},
-				Data: [][]interface{}{
-					{execute.Time(2), -1.0, "b"},
-				},
-			}},
-		},
 		*/
 		{
 			name: "float with multiple values",

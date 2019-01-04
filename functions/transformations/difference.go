@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/apache/arrow/go/arrow/array"
 	"github.com/influxdata/flux"
 	"github.com/influxdata/flux/arrow"
 	"github.com/influxdata/flux/execute"
@@ -188,7 +187,7 @@ func (t *differenceTransformation) Process(id execute.DatasetID, tbl flux.Table)
 				d := differences[j]
 				switch c.Type {
 				case flux.TBool:
-					if err := appendSlicedCol(j, firstIdx, c.Type, cr, builder); err != nil {
+					if err := arrow.AppendBools(builder, j, arrow.BoolSlice(cr.Bools(j), firstIdx, l)); err != nil {
 						return err
 					}
 				case flux.TInt:
@@ -202,7 +201,7 @@ func (t *differenceTransformation) Process(id execute.DatasetID, tbl flux.Table)
 							}
 						}
 					} else {
-						if err := appendSlicedCol(j, firstIdx, c.Type, cr, builder); err != nil {
+						if err := arrow.AppendInts(builder, j, arrow.IntSlice(cr.Ints(j), firstIdx, l)); err != nil {
 							return err
 						}
 					}
@@ -217,7 +216,7 @@ func (t *differenceTransformation) Process(id execute.DatasetID, tbl flux.Table)
 							}
 						}
 					} else {
-						if err := appendSlicedCol(j, firstIdx, c.Type, cr, builder); err != nil {
+						if err := arrow.AppendUInts(builder, j, arrow.UintSlice(cr.UInts(j), firstIdx, l)); err != nil {
 							return err
 						}
 					}
@@ -232,16 +231,16 @@ func (t *differenceTransformation) Process(id execute.DatasetID, tbl flux.Table)
 							}
 						}
 					} else {
-						if err := appendSlicedCol(j, firstIdx, c.Type, cr, builder); err != nil {
+						if err := arrow.AppendFloats(builder, j, arrow.FloatSlice(cr.Floats(j), firstIdx, l)); err != nil {
 							return err
 						}
 					}
 				case flux.TString:
-					if err := appendSlicedCol(j, firstIdx, c.Type, cr, builder); err != nil {
+					if err := arrow.AppendStrings(builder, j, arrow.StringSlice(cr.Strings(j), firstIdx, l)); err != nil {
 						return err
 					}
 				case flux.TTime:
-					if err := appendSlicedCol(j, firstIdx, c.Type, cr, builder); err != nil {
+					if err := arrow.AppendTimes(builder, j, arrow.IntSlice(cr.Times(j), firstIdx, l)); err != nil {
 						return err
 					}
 				}
@@ -252,79 +251,6 @@ func (t *differenceTransformation) Process(id execute.DatasetID, tbl flux.Table)
 		firstIdx = 0
 		return nil
 	})
-}
-
-func appendSlicedCol(j, start int, typ flux.ColType, cr flux.ArrowColReader, builder execute.TableBuilder) error {
-	switch typ {
-	case flux.TBool:
-		var sliced *array.Boolean
-		if start == 0 {
-			sliced = cr.Bools(j)
-		} else {
-			sliced = arrow.BoolSlice(cr.Bools(j), start, cr.Len())
-		}
-
-		if err := arrow.AppendBools(builder, j, sliced); err != nil {
-			return err
-		}
-	case flux.TInt:
-		var sliced *array.Int64
-		if start == 0 {
-			sliced = cr.Ints(j)
-		} else {
-			sliced = arrow.IntSlice(cr.Ints(j), start, cr.Len())
-		}
-
-		if err := arrow.AppendInts(builder, j, sliced); err != nil {
-			return err
-		}
-	case flux.TUInt:
-		var sliced *array.Uint64
-		if start == 0 {
-			sliced = cr.UInts(j)
-		} else {
-			sliced = arrow.UintSlice(cr.UInts(j), start, cr.Len())
-		}
-
-		if err := arrow.AppendUInts(builder, j, sliced); err != nil {
-			return err
-		}
-	case flux.TFloat:
-		var sliced *array.Float64
-		if start == 0 {
-			sliced = cr.Floats(j)
-		} else {
-			sliced = arrow.FloatSlice(cr.Floats(j), start, cr.Len())
-		}
-
-		if err := arrow.AppendFloats(builder, j, sliced); err != nil {
-			return err
-		}
-	case flux.TString:
-		var sliced *array.Binary
-		if start == 0 {
-			sliced = cr.Strings(j)
-		} else {
-			sliced = arrow.StringSlice(cr.Strings(j), start, cr.Len())
-		}
-
-		if err := arrow.AppendStrings(builder, j, sliced); err != nil {
-			return err
-		}
-	case flux.TTime:
-		var sliced *array.Int64
-		if start == 0 {
-			sliced = cr.Times(j)
-		} else {
-			sliced = arrow.IntSlice(cr.Times(j), start, cr.Len())
-		}
-
-		if err := arrow.AppendTimes(builder, j, sliced); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (t *differenceTransformation) UpdateWatermark(id execute.DatasetID, mark execute.Time) error {
