@@ -1218,6 +1218,21 @@ Example:
 
 **Note:** The `yield` function produces side effects.
 
+#### Fill
+
+Fill will scan a stream for nil values and replace them with a non-null value.  
+
+The output stream will be the same as the input stream, with all null values replaced.  
+
+Fill has the following properties: 
+
+* `valueColumn`  string
+    the column to fill
+* `value`        bool, int, uint, float, string, time
+    the constant value to use in place of nulls
+* `usePrevious`  bool
+    if set, then assign the value set in the previous non-nil row
+
 #### AssertEquals
 
 AssertEquals is a function that will test whether two streams have identical data.  It also outputs the data from the tested stream unchanged, so that this function can be used to perform in-line tests in a query.  
