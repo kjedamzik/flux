@@ -33,7 +33,7 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 	generateCmd.Flags().StringVar(&pkgName, "pkg", "", "The fully qualified package name of the root package.")
 	generateCmd.Flags().StringVar(&rootDir, "root-dir", ".", "The root level directory for all packages.")
-	generateCmd.Flags().StringVar(&importFile, "import-file", "builtin.go", "Location relative to root-dir to place a file to import all generated packages.")
+	generateCmd.Flags().StringVar(&importFile, "import-file", "builtin_gen.go", "Location relative to root-dir to place a file to import all generated packages.")
 }
 
 func generate(cmd *cobra.Command, args []string) error {
@@ -87,7 +87,7 @@ func generate(cmd *cobra.Command, args []string) error {
 		}
 		f.Var().Id("pkgAST").Op("=").Add(v)
 
-		return f.Save(filepath.Join(dir, "flux.go"))
+		return f.Save(filepath.Join(dir, "flux_gen.go"))
 	})
 	if err != nil {
 		return err
@@ -211,6 +211,11 @@ func constructValue(v reflect.Value) (jen.Code, error) {
 		values := make(jen.Dict, v.NumField())
 		for i := 0; i < v.NumField(); i++ {
 			field := v.Field(i)
+			if !field.CanInterface() {
+				// Ignore private fields
+				continue
+			}
+
 			val, err := constructValue(field)
 			if err != nil {
 				return nil, err
