@@ -1,7 +1,8 @@
-package inputs
+package influxdb
 
 import (
 	"fmt"
+
 	"github.com/influxdata/flux"
 	"github.com/influxdata/flux/ast"
 	"github.com/influxdata/flux/execute"
@@ -30,7 +31,7 @@ func init() {
 		Return:   flux.TableObjectType,
 	}
 
-	flux.RegisterFunction(FromKind, createFromOpSpec, fromSignature)
+	flux.RegisterPackageValue("influxdb", FromKind, flux.FunctionValue(FromKind, createFromOpSpec, fromSignature))
 	flux.RegisterOpSpec(FromKind, newFromOp)
 	plan.RegisterProcedureSpec(FromKind, newFromProcedure, FromKind)
 	plan.RegisterPhysicalRules(

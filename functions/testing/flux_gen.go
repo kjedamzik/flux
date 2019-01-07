@@ -24,6 +24,7 @@ var pkgAST = &ast.Package{
 					Column: 61,
 					Line:   4,
 				},
+				File:   "test.flux",
 				Source: "package testing\n\ntest = (name,input,want,test) =>\n    assertEquals(name: name, got: input|>test(), want: want)",
 				Start: ast.Position{
 					Column: 1,
@@ -39,6 +40,7 @@ var pkgAST = &ast.Package{
 						Column: 61,
 						Line:   4,
 					},
+					File:   "test.flux",
 					Source: "test = (name,input,want,test) =>\n    assertEquals(name: name, got: input|>test(), want: want)",
 					Start: ast.Position{
 						Column: 1,
@@ -54,6 +56,7 @@ var pkgAST = &ast.Package{
 							Column: 5,
 							Line:   3,
 						},
+						File:   "test.flux",
 						Source: "test",
 						Start: ast.Position{
 							Column: 1,
@@ -71,6 +74,7 @@ var pkgAST = &ast.Package{
 							Column: 61,
 							Line:   4,
 						},
+						File:   "test.flux",
 						Source: "(name,input,want,test) =>\n    assertEquals(name: name, got: input|>test(), want: want)",
 						Start: ast.Position{
 							Column: 8,
@@ -87,6 +91,7 @@ var pkgAST = &ast.Package{
 									Column: 60,
 									Line:   4,
 								},
+								File:   "test.flux",
 								Source: "name: name, got: input|>test(), want: want",
 								Start: ast.Position{
 									Column: 18,
@@ -102,6 +107,7 @@ var pkgAST = &ast.Package{
 										Column: 28,
 										Line:   4,
 									},
+									File:   "test.flux",
 									Source: "name: name",
 									Start: ast.Position{
 										Column: 18,
@@ -117,6 +123,7 @@ var pkgAST = &ast.Package{
 											Column: 22,
 											Line:   4,
 										},
+										File:   "test.flux",
 										Source: "name",
 										Start: ast.Position{
 											Column: 18,
@@ -134,6 +141,7 @@ var pkgAST = &ast.Package{
 											Column: 28,
 											Line:   4,
 										},
+										File:   "test.flux",
 										Source: "name",
 										Start: ast.Position{
 											Column: 24,
@@ -151,6 +159,7 @@ var pkgAST = &ast.Package{
 										Column: 48,
 										Line:   4,
 									},
+									File:   "test.flux",
 									Source: "got: input|>test()",
 									Start: ast.Position{
 										Column: 30,
@@ -166,6 +175,7 @@ var pkgAST = &ast.Package{
 											Column: 33,
 											Line:   4,
 										},
+										File:   "test.flux",
 										Source: "got",
 										Start: ast.Position{
 											Column: 30,
@@ -184,6 +194,7 @@ var pkgAST = &ast.Package{
 												Column: 40,
 												Line:   4,
 											},
+											File:   "test.flux",
 											Source: "input",
 											Start: ast.Position{
 												Column: 35,
@@ -200,6 +211,7 @@ var pkgAST = &ast.Package{
 											Column: 48,
 											Line:   4,
 										},
+										File:   "test.flux",
 										Source: "input|>test()",
 										Start: ast.Position{
 											Column: 35,
@@ -216,6 +228,7 @@ var pkgAST = &ast.Package{
 												Column: 48,
 												Line:   4,
 											},
+											File:   "test.flux",
 											Source: "test()",
 											Start: ast.Position{
 												Column: 42,
@@ -231,6 +244,7 @@ var pkgAST = &ast.Package{
 													Column: 46,
 													Line:   4,
 												},
+												File:   "test.flux",
 												Source: "test",
 												Start: ast.Position{
 													Column: 42,
@@ -250,6 +264,7 @@ var pkgAST = &ast.Package{
 										Column: 60,
 										Line:   4,
 									},
+									File:   "test.flux",
 									Source: "want: want",
 									Start: ast.Position{
 										Column: 50,
@@ -265,6 +280,7 @@ var pkgAST = &ast.Package{
 											Column: 54,
 											Line:   4,
 										},
+										File:   "test.flux",
 										Source: "want",
 										Start: ast.Position{
 											Column: 50,
@@ -282,6 +298,7 @@ var pkgAST = &ast.Package{
 											Column: 60,
 											Line:   4,
 										},
+										File:   "test.flux",
 										Source: "want",
 										Start: ast.Position{
 											Column: 56,
@@ -300,6 +317,7 @@ var pkgAST = &ast.Package{
 								Column: 61,
 								Line:   4,
 							},
+							File:   "test.flux",
 							Source: "assertEquals(name: name, got: input|>test(), want: want)",
 							Start: ast.Position{
 								Column: 5,
@@ -315,6 +333,7 @@ var pkgAST = &ast.Package{
 									Column: 17,
 									Line:   4,
 								},
+								File:   "test.flux",
 								Source: "assertEquals",
 								Start: ast.Position{
 									Column: 5,
@@ -333,6 +352,7 @@ var pkgAST = &ast.Package{
 								Column: 13,
 								Line:   3,
 							},
+							File:   "test.flux",
 							Source: "name",
 							Start: ast.Position{
 								Column: 9,
@@ -348,6 +368,7 @@ var pkgAST = &ast.Package{
 									Column: 13,
 									Line:   3,
 								},
+								File:   "test.flux",
 								Source: "name",
 								Start: ast.Position{
 									Column: 9,
@@ -366,6 +387,7 @@ var pkgAST = &ast.Package{
 								Column: 19,
 								Line:   3,
 							},
+							File:   "test.flux",
 							Source: "input",
 							Start: ast.Position{
 								Column: 14,
@@ -381,6 +403,7 @@ var pkgAST = &ast.Package{
 									Column: 19,
 									Line:   3,
 								},
+								File:   "test.flux",
 								Source: "input",
 								Start: ast.Position{
 									Column: 14,
@@ -399,6 +422,7 @@ var pkgAST = &ast.Package{
 								Column: 24,
 								Line:   3,
 							},
+							File:   "test.flux",
 							Source: "want",
 							Start: ast.Position{
 								Column: 20,
@@ -414,6 +438,7 @@ var pkgAST = &ast.Package{
 									Column: 24,
 									Line:   3,
 								},
+								File:   "test.flux",
 								Source: "want",
 								Start: ast.Position{
 									Column: 20,
@@ -432,6 +457,7 @@ var pkgAST = &ast.Package{
 								Column: 29,
 								Line:   3,
 							},
+							File:   "test.flux",
 							Source: "test",
 							Start: ast.Position{
 								Column: 25,
@@ -447,6 +473,7 @@ var pkgAST = &ast.Package{
 									Column: 29,
 									Line:   3,
 								},
+								File:   "test.flux",
 								Source: "test",
 								Start: ast.Position{
 									Column: 25,
@@ -470,6 +497,7 @@ var pkgAST = &ast.Package{
 						Column: 16,
 						Line:   1,
 					},
+					File:   "test.flux",
 					Source: "package testing",
 					Start: ast.Position{
 						Column: 1,
@@ -485,6 +513,7 @@ var pkgAST = &ast.Package{
 							Column: 16,
 							Line:   1,
 						},
+						File:   "test.flux",
 						Source: "testing",
 						Start: ast.Position{
 							Column: 9,

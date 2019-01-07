@@ -23,6 +23,20 @@ type packageObject struct {
 	sideEffects []values.Value
 }
 
+func (p *packageObject) Copy() Package {
+	c := &packageObject{
+		name:  p.name,
+		scope: p.scope.LocalCopy(),
+	}
+	c.private = make(map[string]bool, len(p.private))
+	for k, v := range p.private {
+		c.private[k] = v
+	}
+	c.sideEffects = make([]values.Value, len(p.sideEffects))
+	copy(c.sideEffects, p.sideEffects)
+	return c
+}
+
 func (p *packageObject) Name() string {
 	return p.name
 }
@@ -804,6 +818,18 @@ func (s *Scope) Copy() *Scope {
 			c.values[k] = v
 		}
 		curr = curr.parent
+	}
+	return c
+}
+
+// LocalCopy returns a copy of the scope without its parents.
+func (s *Scope) LocalCopy() *Scope {
+	c := &Scope{
+		values: make(map[string]values.Value, len(s.values)),
+	}
+	// copy values
+	for k, v := range s.values {
+		c.values[k] = v
 	}
 	return c
 }

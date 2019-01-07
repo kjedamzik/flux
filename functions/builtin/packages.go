@@ -6,5 +6,5 @@ import (
 	_ "github.com/influxdata/flux/functions/influxdb"
 	_ "github.com/influxdata/flux/functions/influxdb/telegraf"
 	_ "github.com/influxdata/flux/functions/testing"
-	_ "github.com/influxdata/flux/functions/tests/testdata"
+	//_ "github.com/influxdata/flux/functions/tests/testdata"
 )

@@ -29,7 +29,7 @@ outData = "
 #group,true,true
 #default,,
 ,error,reference
-,"rename error: column ""old"" doesn't exist",
+,\"rename error: column \"\"old\"\" doesn't exist\",
 "
 
 drop_before_rename = (table=<-) =>

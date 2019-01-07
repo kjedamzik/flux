@@ -41,6 +41,6 @@ got = indata |> t_yield() |> yield(name: "5")
 want = testLoadStorage(csv: outData) |> yield(name:"6")
 //assertEquals(name: "yield", want: want, got: got)
 //testingTest(name: "yield",
-            input: testLoadStorage(csv: inData),
-            want: testLoadMem(csv: outData),
-            test: t_yield)
+//            input: testLoadStorage(csv: inData),
+//            want: testLoadMem(csv: outData),
+//            test: t_yield)

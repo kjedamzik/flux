@@ -77,7 +77,7 @@ func Eval(itrp *interpreter.Interpreter, q string) error {
 		return err
 	}
 
-	if err := itrp.Eval(semPkg, BuiltinImporter); err != nil {
+	if err := itrp.Eval(semPkg, BuiltinImporter.Copy()); err != nil {
 		return err
 	}
 	return nil
@@ -151,9 +151,10 @@ var builtinValues = make(map[string]values.Value)
 var builtinOptions = make(map[string]values.Value)
 var builtinTypeScope = interpreter.NewTypeScope()
 
-// list of builtin scripts
+// set of builtins
 var builtinScripts = make(map[string]string)
 var builtinPackages = make(map[string]*ast.Package)
+var builtinPackageValues = make(map[string]map[string]values.Value)
 var finalized bool
 
 // RegisterBuiltIn adds any variable declarations written in Flux script to the builtin scope.
@@ -178,6 +179,22 @@ func RegisterPackage(pkg *ast.Package) {
 	builtinPackages[pkg.Path] = pkg
 }
 
+// RegisterPackageValue adds a value for an identifier in a builtin package
+func RegisterPackageValue(path, name string, value values.Value) {
+	if finalized {
+		panic(errors.New("already finalized, cannot register builtin package value"))
+	}
+	packageValues, ok := builtinPackageValues[path]
+	if !ok {
+		packageValues = make(map[string]values.Value)
+		builtinPackageValues[path] = packageValues
+	}
+	if _, ok := packageValues[name]; ok {
+		panic(fmt.Errorf("duplicate builtin package value %q %q", path, name))
+	}
+	packageValues[name] = value
+}
+
 // RegisterFunction adds a new builtin top level function.
 // Name is the name of the function as it would be called.
 // c is a function reference of type CreateOperationSpec
@@ -190,6 +207,19 @@ func RegisterFunction(name string, c CreateOperationSpec, sig semantic.FunctionP
 		hasSideEffect: false,
 	}
 	RegisterBuiltInValue(name, &f)
+}
+
+// FunctionValue creates a values.Value from the operation spec and signature.
+// Name is the name of the function as it would be called.
+// c is a function reference of type CreateOperationSpec
+// sig is a function signature type that specifies the names and types of each argument for the function.
+func FunctionValue(name string, c CreateOperationSpec, sig semantic.FunctionPolySignature) values.Value {
+	return &function{
+		t:             semantic.NewFunctionPolyType(sig),
+		name:          name,
+		createOpSpec:  c,
+		hasSideEffect: false,
+	}
 }
 
 // RegisterFunctionWithSideEffect adds a new builtin top level function that produces side effects.
@@ -280,12 +310,30 @@ func evalBuiltInPackages() error {
 			return errors.Wrapf(err, "failed to create semantic graph for builtin package %q", astPkg.Package)
 		}
 
-		itrp := NewInterpreter()
+		// Make a copy of the global builtin values and add any builtin package values
+		packageValues := builtinPackageValues[astPkg.Path]
+		vals := make(map[string]values.Value, len(builtinValues)+len(packageValues))
+		for k, v := range builtinValues {
+			vals[k] = v
+		}
+		for k, v := range packageValues {
+			vals[k] = v
+		}
+
+		// Make a copy of the builtin options since they can be modified
+		options := make(map[string]values.Value, len(builtinOptions))
+		for k, v := range builtinOptions {
+			options[k] = v
+		}
+
+		itrp := interpreter.NewMutableInterpreter(options, vals, builtinTypeScope)
 		if err := itrp.Eval(semPkg, BuiltinImporter); err != nil {
 			return errors.Wrapf(err, "failed to evaluate builtin package %q", astPkg.Package)
 		}
 		BuiltinImporter.Packages[astPkg.Path] = itrp.Package()
 	}
+	// We no longer needs the package values
+	builtinPackageValues = nil
 	return nil
 }
 
@@ -739,6 +787,16 @@ var BuiltinImporter = &importer{
 
 type importer struct {
 	Packages map[string]interpreter.Package
+}
+
+func (imp *importer) Copy() *importer {
+	packages := make(map[string]interpreter.Package, len(imp.Packages))
+	for k, v := range imp.Packages {
+		packages[k] = v.Copy()
+	}
+	return &importer{
+		Packages: packages,
+	}
 }
 
 func (imp *importer) Import(path string) (semantic.PackageType, bool) {

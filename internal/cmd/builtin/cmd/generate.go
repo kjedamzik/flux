@@ -11,6 +11,7 @@ import (
 	"github.com/influxdata/flux/ast"
 	"github.com/influxdata/flux/internal/token"
 	"github.com/influxdata/flux/parser"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -58,6 +59,9 @@ func generate(cmd *cobra.Command, args []string) error {
 				keys = append(keys, k)
 			}
 			return fmt.Errorf("found multiple packages in the same directory: %s packages %v", dir, keys)
+		}
+		if ast.Check(pkg) > 0 {
+			return errors.Wrapf(ast.GetError(pkg), "failed to parse package %q", pkg.Package)
 		}
 
 		pkgPath := path.Join(pkgName, dir)

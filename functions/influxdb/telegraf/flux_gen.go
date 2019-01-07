@@ -24,6 +24,7 @@ var pkgAST = &ast.Package{
 					Column: 48,
 					Line:   8,
 				},
+				File:   "system.flux",
 				Source: "package telegraf\n\nimport \"influxdb\"\n\noption bucket = \"telegraf\"\n\ncpu = (bucket=bucket) =>\n    influxdb.measurement(bucket:bucket,m:\"cpu\")",
 				Start: ast.Position{
 					Column: 1,
@@ -40,6 +41,7 @@ var pkgAST = &ast.Package{
 							Column: 27,
 							Line:   5,
 						},
+						File:   "system.flux",
 						Source: "bucket = \"telegraf\"",
 						Start: ast.Position{
 							Column: 8,
@@ -55,6 +57,7 @@ var pkgAST = &ast.Package{
 								Column: 14,
 								Line:   5,
 							},
+							File:   "system.flux",
 							Source: "bucket",
 							Start: ast.Position{
 								Column: 8,
@@ -72,6 +75,7 @@ var pkgAST = &ast.Package{
 								Column: 27,
 								Line:   5,
 							},
+							File:   "system.flux",
 							Source: "\"telegraf\"",
 							Start: ast.Position{
 								Column: 17,
@@ -89,6 +93,7 @@ var pkgAST = &ast.Package{
 						Column: 27,
 						Line:   5,
 					},
+					File:   "system.flux",
 					Source: "option bucket = \"telegraf\"",
 					Start: ast.Position{
 						Column: 1,
@@ -104,6 +109,7 @@ var pkgAST = &ast.Package{
 						Column: 48,
 						Line:   8,
 					},
+					File:   "system.flux",
 					Source: "cpu = (bucket=bucket) =>\n    influxdb.measurement(bucket:bucket,m:\"cpu\")",
 					Start: ast.Position{
 						Column: 1,
@@ -119,6 +125,7 @@ var pkgAST = &ast.Package{
 							Column: 4,
 							Line:   7,
 						},
+						File:   "system.flux",
 						Source: "cpu",
 						Start: ast.Position{
 							Column: 1,
@@ -136,6 +143,7 @@ var pkgAST = &ast.Package{
 							Column: 48,
 							Line:   8,
 						},
+						File:   "system.flux",
 						Source: "(bucket=bucket) =>\n    influxdb.measurement(bucket:bucket,m:\"cpu\")",
 						Start: ast.Position{
 							Column: 7,
@@ -152,6 +160,7 @@ var pkgAST = &ast.Package{
 									Column: 47,
 									Line:   8,
 								},
+								File:   "system.flux",
 								Source: "bucket:bucket,m:\"cpu\"",
 								Start: ast.Position{
 									Column: 26,
@@ -167,6 +176,7 @@ var pkgAST = &ast.Package{
 										Column: 39,
 										Line:   8,
 									},
+									File:   "system.flux",
 									Source: "bucket:bucket",
 									Start: ast.Position{
 										Column: 26,
@@ -182,6 +192,7 @@ var pkgAST = &ast.Package{
 											Column: 32,
 											Line:   8,
 										},
+										File:   "system.flux",
 										Source: "bucket",
 										Start: ast.Position{
 											Column: 26,
@@ -199,6 +210,7 @@ var pkgAST = &ast.Package{
 											Column: 39,
 											Line:   8,
 										},
+										File:   "system.flux",
 										Source: "bucket",
 										Start: ast.Position{
 											Column: 33,
@@ -216,6 +228,7 @@ var pkgAST = &ast.Package{
 										Column: 47,
 										Line:   8,
 									},
+									File:   "system.flux",
 									Source: "m:\"cpu\"",
 									Start: ast.Position{
 										Column: 40,
@@ -231,6 +244,7 @@ var pkgAST = &ast.Package{
 											Column: 41,
 											Line:   8,
 										},
+										File:   "system.flux",
 										Source: "m",
 										Start: ast.Position{
 											Column: 40,
@@ -248,6 +262,7 @@ var pkgAST = &ast.Package{
 											Column: 47,
 											Line:   8,
 										},
+										File:   "system.flux",
 										Source: "\"cpu\"",
 										Start: ast.Position{
 											Column: 42,
@@ -266,6 +281,7 @@ var pkgAST = &ast.Package{
 								Column: 48,
 								Line:   8,
 							},
+							File:   "system.flux",
 							Source: "influxdb.measurement(bucket:bucket,m:\"cpu\")",
 							Start: ast.Position{
 								Column: 5,
@@ -281,6 +297,7 @@ var pkgAST = &ast.Package{
 									Column: 25,
 									Line:   8,
 								},
+								File:   "system.flux",
 								Source: "influxdb.measurement",
 								Start: ast.Position{
 									Column: 5,
@@ -296,6 +313,7 @@ var pkgAST = &ast.Package{
 										Column: 13,
 										Line:   8,
 									},
+									File:   "system.flux",
 									Source: "influxdb",
 									Start: ast.Position{
 										Column: 5,
@@ -313,6 +331,7 @@ var pkgAST = &ast.Package{
 										Column: 25,
 										Line:   8,
 									},
+									File:   "system.flux",
 									Source: "measurement",
 									Start: ast.Position{
 										Column: 14,
@@ -332,6 +351,7 @@ var pkgAST = &ast.Package{
 								Column: 21,
 								Line:   7,
 							},
+							File:   "system.flux",
 							Source: "bucket=bucket",
 							Start: ast.Position{
 								Column: 8,
@@ -347,6 +367,7 @@ var pkgAST = &ast.Package{
 									Column: 14,
 									Line:   7,
 								},
+								File:   "system.flux",
 								Source: "bucket",
 								Start: ast.Position{
 									Column: 8,
@@ -364,6 +385,7 @@ var pkgAST = &ast.Package{
 									Column: 21,
 									Line:   7,
 								},
+								File:   "system.flux",
 								Source: "bucket",
 								Start: ast.Position{
 									Column: 15,
@@ -385,6 +407,7 @@ var pkgAST = &ast.Package{
 						Column: 18,
 						Line:   3,
 					},
+					File:   "system.flux",
 					Source: "import \"influxdb\"",
 					Start: ast.Position{
 						Column: 1,
@@ -400,6 +423,7 @@ var pkgAST = &ast.Package{
 							Column: 18,
 							Line:   3,
 						},
+						File:   "system.flux",
 						Source: "\"influxdb\"",
 						Start: ast.Position{
 							Column: 8,
@@ -419,6 +443,7 @@ var pkgAST = &ast.Package{
 						Column: 17,
 						Line:   1,
 					},
+					File:   "system.flux",
 					Source: "package telegraf",
 					Start: ast.Position{
 						Column: 1,
@@ -434,6 +459,7 @@ var pkgAST = &ast.Package{
 							Column: 17,
 							Line:   1,
 						},
+						File:   "system.flux",
 						Source: "telegraf",
 						Start: ast.Position{
 							Column: 9,
