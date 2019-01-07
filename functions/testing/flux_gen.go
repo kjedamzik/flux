@@ -21,10 +21,10 @@ var pkgAST = &ast.Package{
 			Errors: nil,
 			Loc: &ast.SourceLocation{
 				End: ast.Position{
-					Column: 58,
+					Column: 61,
 					Line:   4,
 				},
-				Source: "package testing\n\ntest = (name,input,want,test) =>\n    assertEquals(name:name, got:input|>test(), want:want)",
+				Source: "package testing\n\ntest = (name,input,want,test) =>\n    assertEquals(name: name, got: input|>test(), want: want)",
 				Start: ast.Position{
 					Column: 1,
 					Line:   1,
@@ -36,10 +36,10 @@ var pkgAST = &ast.Package{
 				Errors: nil,
 				Loc: &ast.SourceLocation{
 					End: ast.Position{
-						Column: 58,
+						Column: 61,
 						Line:   4,
 					},
-					Source: "test = (name,input,want,test) =>\n    assertEquals(name:name, got:input|>test(), want:want)",
+					Source: "test = (name,input,want,test) =>\n    assertEquals(name: name, got: input|>test(), want: want)",
 					Start: ast.Position{
 						Column: 1,
 						Line:   3,
@@ -68,10 +68,10 @@ var pkgAST = &ast.Package{
 					Errors: nil,
 					Loc: &ast.SourceLocation{
 						End: ast.Position{
-							Column: 58,
+							Column: 61,
 							Line:   4,
 						},
-						Source: "(name,input,want,test) =>\n    assertEquals(name:name, got:input|>test(), want:want)",
+						Source: "(name,input,want,test) =>\n    assertEquals(name: name, got: input|>test(), want: want)",
 						Start: ast.Position{
 							Column: 8,
 							Line:   3,
@@ -84,10 +84,10 @@ var pkgAST = &ast.Package{
 							Errors: nil,
 							Loc: &ast.SourceLocation{
 								End: ast.Position{
-									Column: 57,
+									Column: 60,
 									Line:   4,
 								},
-								Source: "name:name, got:input|>test(), want:want",
+								Source: "name: name, got: input|>test(), want: want",
 								Start: ast.Position{
 									Column: 18,
 									Line:   4,
@@ -99,10 +99,10 @@ var pkgAST = &ast.Package{
 								Errors: nil,
 								Loc: &ast.SourceLocation{
 									End: ast.Position{
-										Column: 27,
+										Column: 28,
 										Line:   4,
 									},
-									Source: "name:name",
+									Source: "name: name",
 									Start: ast.Position{
 										Column: 18,
 										Line:   4,
@@ -131,12 +131,12 @@ var pkgAST = &ast.Package{
 									Errors: nil,
 									Loc: &ast.SourceLocation{
 										End: ast.Position{
-											Column: 27,
+											Column: 28,
 											Line:   4,
 										},
 										Source: "name",
 										Start: ast.Position{
-											Column: 23,
+											Column: 24,
 											Line:   4,
 										},
 									},
@@ -148,12 +148,12 @@ var pkgAST = &ast.Package{
 								Errors: nil,
 								Loc: &ast.SourceLocation{
 									End: ast.Position{
-										Column: 46,
+										Column: 48,
 										Line:   4,
 									},
-									Source: "got:input|>test()",
+									Source: "got: input|>test()",
 									Start: ast.Position{
-										Column: 29,
+										Column: 30,
 										Line:   4,
 									},
 								},
@@ -163,12 +163,12 @@ var pkgAST = &ast.Package{
 									Errors: nil,
 									Loc: &ast.SourceLocation{
 										End: ast.Position{
-											Column: 32,
+											Column: 33,
 											Line:   4,
 										},
 										Source: "got",
 										Start: ast.Position{
-											Column: 29,
+											Column: 30,
 											Line:   4,
 										},
 									},
@@ -181,12 +181,12 @@ var pkgAST = &ast.Package{
 										Errors: nil,
 										Loc: &ast.SourceLocation{
 											End: ast.Position{
-												Column: 38,
+												Column: 40,
 												Line:   4,
 											},
 											Source: "input",
 											Start: ast.Position{
-												Column: 33,
+												Column: 35,
 												Line:   4,
 											},
 										},
@@ -197,12 +197,12 @@ var pkgAST = &ast.Package{
 									Errors: nil,
 									Loc: &ast.SourceLocation{
 										End: ast.Position{
-											Column: 46,
+											Column: 48,
 											Line:   4,
 										},
 										Source: "input|>test()",
 										Start: ast.Position{
-											Column: 33,
+											Column: 35,
 											Line:   4,
 										},
 									},
@@ -213,12 +213,12 @@ var pkgAST = &ast.Package{
 										Errors: nil,
 										Loc: &ast.SourceLocation{
 											End: ast.Position{
-												Column: 46,
+												Column: 48,
 												Line:   4,
 											},
 											Source: "test()",
 											Start: ast.Position{
-												Column: 40,
+												Column: 42,
 												Line:   4,
 											},
 										},
@@ -228,12 +228,12 @@ var pkgAST = &ast.Package{
 											Errors: nil,
 											Loc: &ast.SourceLocation{
 												End: ast.Position{
-													Column: 44,
+													Column: 46,
 													Line:   4,
 												},
 												Source: "test",
 												Start: ast.Position{
-													Column: 40,
+													Column: 42,
 													Line:   4,
 												},
 											},
@@ -247,12 +247,12 @@ var pkgAST = &ast.Package{
 								Errors: nil,
 								Loc: &ast.SourceLocation{
 									End: ast.Position{
-										Column: 57,
+										Column: 60,
 										Line:   4,
 									},
-									Source: "want:want",
+									Source: "want: want",
 									Start: ast.Position{
-										Column: 48,
+										Column: 50,
 										Line:   4,
 									},
 								},
@@ -262,12 +262,12 @@ var pkgAST = &ast.Package{
 									Errors: nil,
 									Loc: &ast.SourceLocation{
 										End: ast.Position{
-											Column: 52,
+											Column: 54,
 											Line:   4,
 										},
 										Source: "want",
 										Start: ast.Position{
-											Column: 48,
+											Column: 50,
 											Line:   4,
 										},
 									},
@@ -279,12 +279,12 @@ var pkgAST = &ast.Package{
 									Errors: nil,
 									Loc: &ast.SourceLocation{
 										End: ast.Position{
-											Column: 57,
+											Column: 60,
 											Line:   4,
 										},
 										Source: "want",
 										Start: ast.Position{
-											Column: 53,
+											Column: 56,
 											Line:   4,
 										},
 									},
@@ -297,10 +297,10 @@ var pkgAST = &ast.Package{
 						Errors: nil,
 						Loc: &ast.SourceLocation{
 							End: ast.Position{
-								Column: 58,
+								Column: 61,
 								Line:   4,
 							},
-							Source: "assertEquals(name:name, got:input|>test(), want:want)",
+							Source: "assertEquals(name: name, got: input|>test(), want: want)",
 							Start: ast.Position{
 								Column: 5,
 								Line:   4,

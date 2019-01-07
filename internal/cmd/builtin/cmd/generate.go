@@ -39,11 +39,6 @@ func init() {
 func generate(cmd *cobra.Command, args []string) error {
 	var goPackages []string
 	err := walkDirs(rootDir, func(dir string) error {
-		pkgPath := path.Join(pkgName, dir)
-		if pkgPath != pkgName {
-			goPackages = append(goPackages, pkgPath)
-		}
-
 		fset := new(token.FileSet)
 		pkgs, err := parser.ParseDir(fset, dir)
 		if err != nil {
@@ -64,6 +59,12 @@ func generate(cmd *cobra.Command, args []string) error {
 			}
 			return fmt.Errorf("found multiple packages in the same directory: %s packages %v", dir, keys)
 		}
+
+		pkgPath := path.Join(pkgName, dir)
+		if pkgPath != pkgName {
+			goPackages = append(goPackages, pkgPath)
+		}
+
 		// Assign the absolute package path
 		path, err := filepath.Rel(rootDir, dir)
 		if err != nil {
