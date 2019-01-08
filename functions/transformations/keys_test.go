@@ -2,23 +2,83 @@ package transformations_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/influxdata/flux"
 	"github.com/influxdata/flux/execute"
 	"github.com/influxdata/flux/execute/executetest"
+	"github.com/influxdata/flux/functions/inputs"
 	"github.com/influxdata/flux/functions/transformations"
+	"github.com/influxdata/flux/querytest"
 )
 
+func TestKeys_NewQuery(t *testing.T) {
+	tests := []querytest.NewQueryTestCase{
+		{
+			Name: "from range keys",
+			Raw:  `from(bucket:"mydb") |> range(start:-1h) |> keys()`,
+			Want: &flux.Spec{
+				Operations: []*flux.Operation{
+					{
+						ID: "from0",
+						Spec: &inputs.FromOpSpec{
+							Bucket: "mydb",
+						},
+					},
+					{
+						ID: "range1",
+						Spec: &transformations.RangeOpSpec{
+							Start: flux.Time{
+								Relative:   -1 * time.Hour,
+								IsRelative: true,
+							},
+							Stop:        flux.Now,
+							TimeColumn:  "_time",
+							StartColumn: "_start",
+							StopColumn:  "_stop",
+						},
+					},
+					{
+						ID:   "keys2",
+						Spec: &transformations.KeysOpSpec{},
+					},
+				},
+				Edges: []flux.Edge{
+					{Parent: "from0", Child: "range1"},
+					{Parent: "range1", Child: "keys2"},
+				},
+			},
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Parallel()
+			querytest.NewQueryTestHelper(t, tc)
+		})
+	}
+}
+
+func TestKeysOperation_Marshaling(t *testing.T) {
+	data := []byte(`{"id":"keys","kind":"keys","spec":{}}`)
+	op := &flux.Operation{
+		ID:   "keys",
+		Spec: &transformations.KeysOpSpec{},
+	}
+
+	querytest.OperationMarshalingTestHelper(t, data, op)
+}
+
 func TestKeys_Process(t *testing.T) {
+	spec := &transformations.KeysProcedureSpec{}
+
 	testCases := []struct {
 		name string
-		spec *transformations.KeysProcedureSpec
 		data []flux.Table
 		want []*executetest.Table
 	}{
 		{
-			name: "one table",
-			spec: &transformations.KeysProcedureSpec{},
+			name: "one table no keys",
 			data: []flux.Table{
 				&executetest.Table{
 					ColMeta: []flux.ColMeta{
@@ -28,7 +88,7 @@ func TestKeys_Process(t *testing.T) {
 						{Label: "tag1", Type: flux.TString},
 					},
 					Data: [][]interface{}{
-						{execute.Time(1), 2.0, "tag0-0", "tag1-0"},
+						{execute.Time(1), 2.0, "a", "b"},
 					},
 				},
 			},
@@ -36,19 +96,14 @@ func TestKeys_Process(t *testing.T) {
 				ColMeta: []flux.ColMeta{
 					{Label: "_value", Type: flux.TString},
 				},
-				Data: [][]interface{}{
-					{"_time"},
-					{"_value"},
-					{"tag0"},
-					{"tag1"},
-				},
+				Data: nil,
 			}},
 		},
 		{
-			name: "one table except",
-			spec: &transformations.KeysProcedureSpec{Except: []string{"_value", "_time"}},
+			name: "one table with keys",
 			data: []flux.Table{
 				&executetest.Table{
+					KeyCols: []string{"tag0", "tag1"},
 					ColMeta: []flux.ColMeta{
 						{Label: "_time", Type: flux.TTime},
 						{Label: "_value", Type: flux.TFloat},
@@ -56,23 +111,25 @@ func TestKeys_Process(t *testing.T) {
 						{Label: "tag1", Type: flux.TString},
 					},
 					Data: [][]interface{}{
-						{execute.Time(1), 2.0, "tag0-0", "tag1-0"},
+						{execute.Time(1), 2.0, "a", "b"},
 					},
 				},
 			},
 			want: []*executetest.Table{{
+				KeyCols: []string{"tag0", "tag1"},
 				ColMeta: []flux.ColMeta{
+					{Label: "tag0", Type: flux.TString},
+					{Label: "tag1", Type: flux.TString},
 					{Label: "_value", Type: flux.TString},
 				},
 				Data: [][]interface{}{
-					{"tag0"},
-					{"tag1"},
+					{"a", "b", "tag0"},
+					{"a", "b", "tag1"},
 				},
 			}},
 		},
 		{
 			name: "two tables",
-			spec: &transformations.KeysProcedureSpec{},
 			data: []flux.Table{
 				&executetest.Table{
 					KeyCols: []string{"tag0", "tag1"},
@@ -83,7 +140,7 @@ func TestKeys_Process(t *testing.T) {
 						{Label: "_value", Type: flux.TFloat},
 					},
 					Data: [][]interface{}{
-						{"tag0-0", "tag1-0", execute.Time(1), 2.0},
+						{"a", "b", execute.Time(1), 2.0},
 					},
 				},
 				&executetest.Table{
@@ -95,7 +152,7 @@ func TestKeys_Process(t *testing.T) {
 						{Label: "_value", Type: flux.TFloat},
 					},
 					Data: [][]interface{}{
-						{"tag0-0", "tag2-0", execute.Time(1), 2.0},
+						{"a", "c", execute.Time(1), 2.0},
 					},
 				},
 			},
@@ -108,10 +165,8 @@ func TestKeys_Process(t *testing.T) {
 						{Label: "_value", Type: flux.TString},
 					},
 					Data: [][]interface{}{
-						{"tag0-0", "tag1-0", "_time"},
-						{"tag0-0", "tag1-0", "_value"},
-						{"tag0-0", "tag1-0", "tag0"},
-						{"tag0-0", "tag1-0", "tag1"},
+						{"a", "b", "tag0"},
+						{"a", "b", "tag1"},
 					},
 				},
 				{
@@ -122,15 +177,14 @@ func TestKeys_Process(t *testing.T) {
 						{Label: "_value", Type: flux.TString},
 					},
 					Data: [][]interface{}{
-						{"tag0-0", "tag2-0", "_time"},
-						{"tag0-0", "tag2-0", "_value"},
-						{"tag0-0", "tag2-0", "tag0"},
-						{"tag0-0", "tag2-0", "tag2"},
+						{"a", "c", "tag0"},
+						{"a", "c", "tag2"},
 					},
 				},
 			},
 		},
 	}
+
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
@@ -140,7 +194,7 @@ func TestKeys_Process(t *testing.T) {
 				tc.want,
 				nil,
 				func(d execute.Dataset, c execute.TableBuilderCache) execute.Transformation {
-					return transformations.NewKeysTransformation(d, c, tc.spec)
+					return transformations.NewKeysTransformation(d, c, spec)
 				},
 			)
 		})
