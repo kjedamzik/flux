@@ -187,42 +187,66 @@ func (t *Table) DoArrow(f func(flux.ArrowColReader) error) error {
 		case flux.TBool:
 			b := arrow.NewBoolBuilder(nil)
 			for i := range t.Data {
-				b.Append(t.Data[i][j].(bool))
+				if t.Data[i][j] != nil {
+					b.Append(t.Data[i][j].(bool))
+				} else {
+					b.AppendNull()
+				}
 			}
 			cols[j] = b.NewBooleanArray()
 			b.Release()
 		case flux.TFloat:
 			b := arrow.NewFloatBuilder(nil)
 			for i := range t.Data {
-				b.Append(t.Data[i][j].(float64))
+				if t.Data[i][j] != nil {
+					b.Append(t.Data[i][j].(float64))
+				} else {
+					b.AppendNull()
+				}
 			}
 			cols[j] = b.NewFloat64Array()
 			b.Release()
 		case flux.TInt:
 			b := arrow.NewIntBuilder(nil)
 			for i := range t.Data {
-				b.Append(t.Data[i][j].(int64))
+				if t.Data[i][j] != nil {
+					b.Append(t.Data[i][j].(int64))
+				} else {
+					b.AppendNull()
+				}
 			}
 			cols[j] = b.NewInt64Array()
 			b.Release()
 		case flux.TString:
 			b := arrow.NewStringBuilder(nil)
 			for i := range t.Data {
-				b.AppendString(t.Data[i][j].(string))
+				if t.Data[i][j] != nil {
+					b.AppendString(t.Data[i][j].(string))
+				} else {
+					b.AppendNull()
+				}
 			}
 			cols[j] = b.NewBinaryArray()
 			b.Release()
 		case flux.TTime:
 			b := arrow.NewIntBuilder(nil)
 			for i := range t.Data {
-				b.Append(int64(t.Data[i][j].(values.Time)))
+				if t.Data[i][j] != nil {
+					b.Append(int64(t.Data[i][j].(values.Time)))
+				} else {
+					b.AppendNull()
+				}
 			}
 			cols[j] = b.NewInt64Array()
 			b.Release()
 		case flux.TUInt:
 			b := arrow.NewUintBuilder(nil)
 			for i := range t.Data {
-				b.Append(t.Data[i][j].(uint64))
+				if t.Data[i][j] != nil {
+					b.Append(t.Data[i][j].(uint64))
+				} else {
+					b.AppendNull()
+				}
 			}
 			cols[j] = b.NewUint64Array()
 			b.Release()
@@ -380,7 +404,7 @@ func ConvertTable(tbl flux.Table) (*Table, error) {
 		}
 	}
 
-	err := tbl.Do(func(cr flux.ColReader) error {
+	err := tbl.DoArrow(func(cr flux.ArrowColReader) error {
 		l := cr.Len()
 		for i := 0; i < l; i++ {
 			row := make([]interface{}, len(blk.ColMeta))
@@ -388,17 +412,29 @@ func ConvertTable(tbl flux.Table) (*Table, error) {
 				var v interface{}
 				switch c.Type {
 				case flux.TBool:
-					v = cr.Bools(j)[i]
+					if cr.Bools(j).IsValid(i) {
+						v = cr.Bools(j).Value(i)
+					}
 				case flux.TInt:
-					v = cr.Ints(j)[i]
+					if cr.Ints(j).IsValid(i) {
+						v = cr.Ints(j).Value(i)
+					}
 				case flux.TUInt:
-					v = cr.UInts(j)[i]
+					if cr.UInts(j).IsValid(i) {
+						v = cr.UInts(j).Value(i)
+					}
 				case flux.TFloat:
-					v = cr.Floats(j)[i]
+					if cr.Floats(j).IsValid(i) {
+						v = cr.Floats(j).Value(i)
+					}
 				case flux.TString:
-					v = cr.Strings(j)[i]
+					if cr.Strings(j).IsValid(i) {
+						v = string(cr.Strings(j).Value(i))
+					}
 				case flux.TTime:
-					v = cr.Times(j)[i]
+					if cr.Times(j).IsValid(i) {
+						v = values.Time(cr.Times(j).Value(i))
+					}
 				default:
 					panic(fmt.Errorf("unknown column type %s", c.Type))
 				}

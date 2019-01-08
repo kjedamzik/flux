@@ -1613,10 +1613,18 @@ func (c *boolColumnBuilder) Clear() {
 	c.data = c.data[0:0]
 }
 func (c *boolColumnBuilder) Copy() column {
-	data := arrow.NewBool(c.data, c.alloc.Allocator)
+	b := arrow.NewBoolBuilder(c.alloc.Allocator)
+	b.Reserve(len(c.data))
+	for i, v := range c.data {
+		if c.nils[i] {
+			b.AppendNull()
+		} else {
+			b.UnsafeAppend(v)
+		}
+	}
 	col := &boolColumn{
 		ColMeta: c.ColMeta,
-		data:    data,
+		data:    b.NewBooleanArray(),
 	}
 	return col
 }
@@ -1683,10 +1691,18 @@ func (c *intColumnBuilder) Clear() {
 	c.data = c.data[0:0]
 }
 func (c *intColumnBuilder) Copy() column {
-	data := arrow.NewInt(c.data, c.alloc.Allocator)
+	b := arrow.NewIntBuilder(c.alloc.Allocator)
+	b.Reserve(len(c.data))
+	for i, v := range c.data {
+		if c.nils[i] {
+			b.AppendNull()
+		} else {
+			b.UnsafeAppend(v)
+		}
+	}
 	col := &intColumn{
 		ColMeta: c.ColMeta,
-		data:    data,
+		data:    b.NewInt64Array(),
 	}
 	return col
 }
@@ -1750,10 +1766,18 @@ func (c *uintColumnBuilder) Clear() {
 	c.data = c.data[0:0]
 }
 func (c *uintColumnBuilder) Copy() column {
-	data := arrow.NewUint(c.data, c.alloc.Allocator)
+	b := arrow.NewUintBuilder(c.alloc.Allocator)
+	b.Reserve(len(c.data))
+	for i, v := range c.data {
+		if c.nils[i] {
+			b.AppendNull()
+		} else {
+			b.UnsafeAppend(v)
+		}
+	}
 	col := &uintColumn{
 		ColMeta: c.ColMeta,
-		data:    data,
+		data:    b.NewUint64Array(),
 	}
 	return col
 }
@@ -1817,10 +1841,18 @@ func (c *floatColumnBuilder) Clear() {
 	c.data = c.data[0:0]
 }
 func (c *floatColumnBuilder) Copy() column {
-	data := arrow.NewFloat(c.data, c.alloc.Allocator)
+	b := arrow.NewFloatBuilder(c.alloc.Allocator)
+	b.Reserve(len(c.data))
+	for i, v := range c.data {
+		if c.nils[i] {
+			b.AppendNull()
+		} else {
+			b.UnsafeAppend(v)
+		}
+	}
 	col := &floatColumn{
 		ColMeta: c.ColMeta,
-		data:    data,
+		data:    b.NewFloat64Array(),
 	}
 	return col
 }
@@ -1884,10 +1916,18 @@ func (c *stringColumnBuilder) Clear() {
 	c.data = c.data[0:0]
 }
 func (c *stringColumnBuilder) Copy() column {
-	data := arrow.NewString(c.data, c.alloc.Allocator)
+	b := arrow.NewStringBuilder(c.alloc.Allocator)
+	b.Reserve(len(c.data))
+	for i, v := range c.data {
+		if c.nils[i] {
+			b.AppendNull()
+		} else {
+			b.AppendString(v)
+		}
+	}
 	col := &stringColumn{
 		ColMeta: c.ColMeta,
-		data:    data,
+		data:    b.NewBinaryArray(),
 	}
 	return col
 }
@@ -1953,8 +1993,12 @@ func (c *timeColumnBuilder) Clear() {
 func (c *timeColumnBuilder) Copy() column {
 	b := arrow.NewIntBuilder(c.alloc.Allocator)
 	b.Reserve(len(c.data))
-	for _, v := range c.data {
-		b.UnsafeAppend(int64(v))
+	for i, v := range c.data {
+		if c.nils[i] {
+			b.AppendNull()
+		} else {
+			b.UnsafeAppend(int64(v))
+		}
 	}
 	col := &timeColumn{
 		ColMeta: c.ColMeta,

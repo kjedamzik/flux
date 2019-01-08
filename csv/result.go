@@ -634,9 +634,13 @@ func (d *tableDecoder) init(line []string) error {
 func (d *tableDecoder) appendRecord(record []string) error {
 	d.empty = false
 	for j, c := range d.meta.Cols {
-		if record[j] == "" && d.meta.Defaults[j] != nil {
-			v := d.meta.Defaults[j]
-			if err := d.builder.AppendValue(j, v); err != nil {
+		if record[j] == "" {
+			if d.meta.Defaults[j] != nil {
+				v := d.meta.Defaults[j]
+				if err := d.builder.AppendValue(j, v); err != nil {
+					return err
+				}
+			} else if err := d.builder.AppendNil(j); err != nil {
 				return err
 			}
 			continue
@@ -831,7 +835,7 @@ func (e *ResultEncoder) Encode(w io.Writer, result flux.Result) (int64, error) {
 			}
 		}
 
-		err := tbl.Do(func(cr flux.ColReader) error {
+		err := tbl.DoArrow(func(cr flux.ArrowColReader) error {
 			record := row[recordStartIdx:]
 			l := cr.Len()
 			for i := 0; i < l; i++ {
@@ -1104,23 +1108,38 @@ func encodeValue(value values.Value, c colMeta) (string, error) {
 	}
 }
 
-func encodeValueFrom(i, j int, c colMeta, cr flux.ColReader) (string, error) {
+func encodeValueFrom(i, j int, c colMeta, cr flux.ArrowColReader) (string, error) {
+	var v string
 	switch c.Type {
 	case flux.TBool:
-		return strconv.FormatBool(cr.Bools(j)[i]), nil
+		if cr.Bools(j).IsValid(i) {
+			v = strconv.FormatBool(cr.Bools(j).Value(i))
+		}
 	case flux.TInt:
-		return strconv.FormatInt(cr.Ints(j)[i], 10), nil
+		if cr.Ints(j).IsValid(i) {
+			v = strconv.FormatInt(cr.Ints(j).Value(i), 10)
+		}
 	case flux.TUInt:
-		return strconv.FormatUint(cr.UInts(j)[i], 10), nil
+		if cr.UInts(j).IsValid(i) {
+			v = strconv.FormatUint(cr.UInts(j).Value(i), 10)
+		}
 	case flux.TFloat:
-		return strconv.FormatFloat(cr.Floats(j)[i], 'f', -1, 64), nil
+		if cr.Floats(j).IsValid(i) {
+			v = strconv.FormatFloat(cr.Floats(j).Value(i), 'f', -1, 64)
+		}
 	case flux.TString:
-		return cr.Strings(j)[i], nil
+		if cr.Strings(j).IsValid(i) {
+			v = cr.Strings(j).ValueString(i)
+		}
 	case flux.TTime:
-		return encodeTime(cr.Times(j)[i], c.fmt), nil
+		if cr.Times(j).IsValid(i) {
+			v = encodeTime(execute.Time(cr.Times(j).Value(i)), c.fmt)
+		}
 	default:
 		return "", fmt.Errorf("unknown type %v", c.Type)
 	}
+
+	return v, nil
 }
 
 func decodeTime(t string, fmt string) (execute.Time, error) {
